@@ -18,11 +18,11 @@ public class InsurancePolicy {
     private String provider;
 
     @NotNull
-    @JsonFormat(pattern = "YYYY-MM-DD")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;
 
     @NotNull
-    @JsonFormat(pattern = "YYYY-MM-DD")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(nullable = false)
     private LocalDate endDate; // nullable == open-ended
 
@@ -31,7 +31,7 @@ public class InsurancePolicy {
         this.car = car; this.provider = provider; this.startDate = startDate; this.endDate = endDate;
     }
 
-    private boolean isExpired;
+    private Boolean isExpired = Boolean.FALSE;
 
     public Long getId() { return id; }
     public Car getCar() { return car; }

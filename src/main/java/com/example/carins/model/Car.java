@@ -14,6 +14,7 @@ public class Car {
     private Long id;
 
     @NotBlank @Size(min = 5, max = 32)
+    @Column(unique=true)
     private String vin;
 
     private String make;
@@ -23,7 +24,7 @@ public class Car {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Owner owner;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE})
     private final Set<InsuranceClaim> insuranceClaimSet = new HashSet<>();
 
     public Car() {}

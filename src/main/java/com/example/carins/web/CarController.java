@@ -4,14 +4,14 @@ import com.example.carins.service.CarService;
 import com.example.carins.service.serviceImpl.CarServiceImpl;
 import com.example.carins.web.dto.CarDTO;
 import com.example.carins.web.dto.CarEventDTO;
-import com.example.carins.web.dto.InsuranceClaimDTO;
+import com.example.carins.web.dto.InsuranceClaimRequestDTO;
+import com.example.carins.web.dto.InsuranceClaimResponseDTO;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -20,7 +20,7 @@ public class CarController {
 
     private final CarService service;
 
-    public CarController(CarServiceImpl service) {
+    public CarController(CarService service) {
         this.service = service;
     }
 
@@ -35,13 +35,13 @@ public class CarController {
     }
 
     @GetMapping("/cars/{carId}/history")
-    public ResponseEntity<List<CarEventDTO>> getCarHistory(@PathVariable long carId) {
+    public ResponseEntity<List<CarEventDTO>> getCarHistory(@PathVariable Long carId) {
         return ResponseEntity.ok(service.getCarHistory(carId));
     }
 
     @PostMapping("/cars/{carId}/claims")
-    public ResponseEntity<?> registerInsuranceClaim(@PathVariable long carId, @RequestBody @Valid InsuranceClaimDTO insuranceClaimDTO) {
-        InsuranceClaimDTO insuranceClaim = service.registerInsuranceClaim(carId, insuranceClaimDTO);
+    public ResponseEntity<?> registerInsuranceClaim(@PathVariable Long carId, @RequestBody @Valid InsuranceClaimRequestDTO insuranceClaimDTO) {
+        InsuranceClaimResponseDTO insuranceClaim = service.registerInsuranceClaim(carId, insuranceClaimDTO);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")

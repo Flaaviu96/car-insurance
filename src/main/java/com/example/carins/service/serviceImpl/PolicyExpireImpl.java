@@ -2,6 +2,7 @@ package com.example.carins.service.serviceImpl;
 
 import com.example.carins.model.InsurancePolicy;
 import com.example.carins.repo.InsurancePolicyRepository;
+import com.example.carins.service.PolicyExpire;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-public class PolicyExpireImpl {
+public class PolicyExpireImpl implements PolicyExpire {
 
     private static final Logger logger = LoggerFactory.getLogger(PolicyExpireImpl.class);
     private final InsurancePolicyRepository insurancePolicyRepository;
@@ -22,7 +23,7 @@ public class PolicyExpireImpl {
         this.insurancePolicyRepository = insurancePolicyRepository;
     }
 
-    @Scheduled(cron = "*/30 * * * *")
+    @Scheduled(cron = "0 */30 * * * *")
     @Transactional
     public void logExpiredPolicies() {
         LocalDate today = LocalDate.now();

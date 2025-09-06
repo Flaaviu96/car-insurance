@@ -1,21 +1,20 @@
 package com.example.carins.service.serviceImpl;
 
 import com.example.carins.Exceptions.ApiException;
+import com.example.carins.Mapper.InsuranceClaimMapper;
 import com.example.carins.model.Car;
 import com.example.carins.model.InsuranceClaim;
 import com.example.carins.repo.CarRepository;
+import com.example.carins.repo.InsuranceClaimRepository;
 import com.example.carins.repo.InsurancePolicyRepository;
 import com.example.carins.service.CarService;
-import com.example.carins.web.dto.CarDTO;
-import com.example.carins.web.dto.CarEventDTO;
-import com.example.carins.web.dto.InsuranceClaimDTO;
-import com.example.carins.web.dto.InsuranceValidityResponse;
+import com.example.carins.web.dto.*;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.DateTimeException;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.Comparator;
 import java.util.List;
 
@@ -24,10 +23,12 @@ public class CarServiceImpl implements CarService {
 
     private final CarRepository carRepository;
     private final InsurancePolicyRepository policyRepository;
+    private final InsuranceClaimRepository insuranceClaimRepository;
 
-    public CarServiceImpl(CarRepository carRepository, InsurancePolicyRepository policyRepository) {
+    public CarServiceImpl(CarRepository carRepository, InsurancePolicyRepository policyRepository, InsuranceClaimRepository insuranceClaimRepository) {
         this.carRepository = carRepository;
         this.policyRepository = policyRepository;
+        this.insuranceClaimRepository = insuranceClaimRepository;
     }
 
     public List<CarDTO> listCars() {
@@ -39,50 +40,39 @@ public class CarServiceImpl implements CarService {
 
     public InsuranceValidityResponse isInsuranceValid(Long carId, String date) {
         if (carId == null || date == null) {
-            throw new ApiException("Invalid format of date", HttpStatus.BAD_REQUEST);
+            throw new ApiException("Car ID and date must not be null", HttpStatus.BAD_REQUEST);
         }
-        LocalDate localDate;
+
         try {
-            localDate = LocalDate.parse(date);
-            boolean valid = policyRepository.existsActiveOnDate(carId, localDate);
+            LocalDate localDate = LocalDate.parse(date);
+            boolean valid = isInsuranceValid(carId, localDate);
             return new InsuranceValidityResponse(carId, localDate.toString(), valid);
-        } catch (DateTimeParseException e) {
-            throw new ApiException("Invalid format of date", HttpStatus.BAD_REQUEST);
+        } catch (DateTimeException e) {
+            throw new ApiException("Invalid or impossible date, expected yyyy-MM-dd", HttpStatus.BAD_REQUEST);
         }
     }
 
     @Override
     public boolean isInsuranceValid(Long carId, LocalDate localDate) {
-        return false;
-    }
-
-    public InsuranceValidityResponse ceva(String date, Long carId) {
-        LocalDate localDate;
-        try {
-            localDate = LocalDate.parse(date);
-            if (carId == null) {
-                throw new ApiException("Car ID cannot be null", HttpStatus.NOT_FOUND);
-            }
-            boolean valid = policyRepository.existsActiveOnDate(carId, localDate);
-            return  new InsuranceValidityResponse(carId, localDate.toString(), valid);
-        } catch (DateTimeParseException e) {
-            throw new ApiException("Invalid format of date", HttpStatus.BAD_REQUEST);
+        if (carId == null || localDate == null) {
+            throw new ApiException("Car ID and date must not be null", HttpStatus.BAD_REQUEST);
         }
+
+        return policyRepository.existsActiveOnDate(carId, localDate);
     }
 
     @Override
     @Transactional
-    public InsuranceClaimDTO registerInsuranceClaim(Long carId, InsuranceClaimDTO insuranceClaimDTO) {
+    public InsuranceClaimResponseDTO registerInsuranceClaim(Long carId, InsuranceClaimRequestDTO insuranceClaimDTO) {
         if (carId == null) {
             throw  new ApiException("Car ID cannot be null", HttpStatus.NOT_FOUND);
         }
-        InsuranceClaim insuranceClaim = fromDTO(insuranceClaimDTO);
-        Car car = carRepository.findById(carId).orElseThrow(() -> new ApiException("Not found", HttpStatus.NOT_FOUND));
+        InsuranceClaim insuranceClaim = InsuranceClaimMapper.toEntity(insuranceClaimDTO);
+        Car car = carRepository.findById(carId).orElseThrow(() -> new ApiException("Car not found", HttpStatus.NOT_FOUND));
         car.addInsuranceClaim(insuranceClaim);
-        insuranceClaim.setCar(car);
-        carRepository.save(car);
+        insuranceClaim = insuranceClaimRepository.saveAndFlush(insuranceClaim);
 
-        return toDTO(insuranceClaim);
+        return InsuranceClaimMapper.toResponseDTO(insuranceClaim);
     }
 
     @Override
@@ -91,7 +81,7 @@ public class CarServiceImpl implements CarService {
             throw  new ApiException("Car ID cannot be null", HttpStatus.NOT_FOUND);
         }
 
-        Car car = carRepository.findById(carId).orElseThrow(() -> new ApiException("Not found", HttpStatus.NOT_FOUND));
+        Car car = carRepository.findByIdWithClaims(carId).orElseThrow(() -> new ApiException("Car not found", HttpStatus.NOT_FOUND));
 
         return car.getInsuranceClaimSet().stream()
                 .map(this::insuranceClaimToEventDTO)
@@ -99,16 +89,8 @@ public class CarServiceImpl implements CarService {
                 .toList();
     }
 
-    private InsuranceClaim fromDTO(InsuranceClaimDTO insuranceClaimDTO) {
-        return new InsuranceClaim(insuranceClaimDTO.claimDate(), insuranceClaimDTO.description(), insuranceClaimDTO.amount());
-    }
-
     private CarEventDTO insuranceClaimToEventDTO(InsuranceClaim insuranceClaim) {
         return new CarEventDTO(insuranceClaim.getClaimDate(), insuranceClaim.getDescription(), insuranceClaim.getAmount());
-    }
-
-    private InsuranceClaimDTO toDTO(InsuranceClaim insuranceClaim) {
-        return new InsuranceClaimDTO(insuranceClaim.getId(), insuranceClaim.getClaimDate(), insuranceClaim.getDescription(), insuranceClaim.getAmount());
     }
 
     private CarDTO toDto(Car c) {

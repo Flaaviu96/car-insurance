@@ -6,12 +6,11 @@ import jakarta.validation.constraints.Positive;
 
 import java.time.LocalDate;
 
-public record InsuranceClaimDTO(
-        long id,
-
+public record InsuranceClaimRequestDTO(
         @NotNull(message = "Claim date is required")
         LocalDate claimDate,
 
+        @NotNull
         @NotEmpty(message = "Description cannot be empty")
         String description,
 

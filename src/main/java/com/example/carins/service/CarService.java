@@ -1,9 +1,6 @@
 package com.example.carins.service;
 
-import com.example.carins.web.dto.CarDTO;
-import com.example.carins.web.dto.CarEventDTO;
-import com.example.carins.web.dto.InsuranceClaimDTO;
-import com.example.carins.web.dto.InsuranceValidityResponse;
+import com.example.carins.web.dto.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,7 +13,7 @@ public interface CarService {
 
     boolean isInsuranceValid(Long carId, LocalDate localDate);
 
-    InsuranceClaimDTO registerInsuranceClaim(Long carId, InsuranceClaimDTO insuranceClaimDTO);
+    InsuranceClaimResponseDTO registerInsuranceClaim(Long carId, InsuranceClaimRequestDTO insuranceClaimDTO);
 
     List<CarEventDTO> getCarHistory(Long carId);
 }

@@ -3,6 +3,7 @@ package com.example.carins.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 import java.time.LocalDate;
 
@@ -10,28 +11,24 @@ import java.time.LocalDate;
 public class InsuranceClaim {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "insurance_claim_seq")
+    @SequenceGenerator(name = "insurance_claim_seq", sequenceName = "insurance_claim_seq", allocationSize = 1)
     private Long id;
 
     @ManyToOne
     @JoinColumn
     private Car car;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @NotNull
-    @JsonFormat(pattern = "YYYY-MM-DD")
     private LocalDate claimDate;
 
     private String description;
 
+    @Positive
     private float amount;
 
     public InsuranceClaim() {
-    }
-
-    public InsuranceClaim (LocalDate claimDate, String description, float amount) {
-        this.claimDate = claimDate;
-        this.description = description;
-        this.amount = amount;
     }
 
     public long getId() { return id;}
