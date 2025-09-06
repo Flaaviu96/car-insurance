@@ -55,7 +55,6 @@ class CarControllerTest {
                 .andExpect(content().string(containsString("Amount must be greater than 0")));
     }
 
-
     @Test
     void testRegisterInsuranceClaim() throws Exception {
         InsuranceClaimRequestDTO dto = new InsuranceClaimRequestDTO(
@@ -103,5 +102,4 @@ class CarControllerTest {
 
         verify(service).getCarHistory(eq(1L));
     }
-
 }

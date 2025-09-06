@@ -127,7 +127,6 @@ class CarInsuranceApplicationTests {
         assertEquals(requestClaim.claimDate(), responseDTO.claimDate());
         assertEquals(requestClaim.description(), responseDTO.description());
         assertEquals(requestClaim.amount(), responseDTO.amount());
-
     }
 
     @Test

@@ -1,6 +1,5 @@
 package com.example.carins.GlobalExceptionHandler;
 
-import com.example.carins.Exceptions.ApiException;
 import com.example.carins.Exceptions.ErrorDetails;
 import com.example.carins.Exceptions.GlobalException;
 import org.springframework.http.HttpStatus;

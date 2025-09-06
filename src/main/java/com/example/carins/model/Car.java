@@ -24,12 +24,16 @@ public class Car {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Owner owner;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE})
+    @OneToMany(mappedBy = "car", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE})
     private final Set<InsuranceClaim> insuranceClaimSet = new HashSet<>();
 
     public Car() {}
     public Car(String vin, String make, String model, int yearOfManufacture, Owner owner) {
         this.vin = vin; this.make = make; this.model = model; this.yearOfManufacture = yearOfManufacture; this.owner = owner;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getId() { return id; }
